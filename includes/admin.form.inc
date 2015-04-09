@@ -6,10 +6,10 @@
  */
 
 /**
- * Admin form.
+ * Admin form. SFOX Not required?
  */
-function islandora_pathauto_admin_settings(array $form, array &$form_state) {
-  module_load_include('inc', 'islandora', 'includes/utilities');
+function islandora_pathauto_admin_settings(array &$form_state) {
+  //module_load_include('inc', 'islandora', 'includes/utilities');
   drupal_add_css(drupal_get_path('module', 'islandora_image_annotation') . '/css/islandora_annotation.css');
   $all_cmodels = islandora_get_content_models();
   $already_chosen = variable_get('islandora_pathauto_selected_cmodels', array());
@@ -80,7 +80,6 @@ function islandora_pathauto_admin_settings_submit($form, &$form_state) {
   variable_set('islandora_pathauto_selected_cmodels', array_keys($enabled));
 }
 
-
 /**
  * Themes the form table.
  *
@@ -94,22 +93,24 @@ function theme_islandora_pathauto_admin_table(array $variables) {
   // Set form.
   $form = $variables['form'];
   $rows = array();
-  foreach ($form['name'] as $key => $element) {
-    // Do not take form control structures.
-    if (is_array($element) && element_child($key)) {
-      $row = array();
-      $row[] = array(
-        'data' => drupal_render($form['enabled'][$key]),
-        'class' => 'islandora-annotation-checkbox');
-      $row[] = array(
-        'data' => drupal_render($form['name'][$key]),
-        'title' => $key);
-      $row[] = array(
-        'data' => drupal_render($form['content_model'][$key]));
-      // Add to rows.
-      $rows[] = array(
-        'data' => $row,
-        'class' => array('draggable'));
+  if (!is_null($form)) {
+    foreach ($form['name'] as $key => $element) {
+      // Do not take form control structures.
+      if (is_array($element) && element_child($key)) {
+        $row = array();
+        $row[] = array(
+          'data' => drupal_render($form['enabled'][$key]),
+          'class' => 'islandora-annotation-checkbox');
+        $row[] = array(
+          'data' => drupal_render($form['name'][$key]),
+          'title' => $key);
+        $row[] = array(
+          'data' => drupal_render($form['content_model'][$key]));
+        // Add to rows.
+        $rows[] = array(
+          'data' => $row,
+          'class' => array('draggable'));
+      }
     }
   }
   // Individual table headers.
@@ -120,13 +121,19 @@ function theme_islandora_pathauto_admin_table(array $variables) {
 
   // Render form.
   $output = '';
-  $output .= theme('table', array(
+  /* SFOX changed to work with D6
+    $output .= theme('table', 
+    array(
     'header' => $header,
     'rows' => $rows,
     'attributes' => array(
-      'id' => 'annotation_admin_table',
+    'id' => 'annotation_admin_table',
     ),
-  ));
-  $output .= drupal_render_children($form);
+    )); */
+  $output .= theme('table', $header, $rows, array('id' => 'annotation_admin_table',));
+  if (!is_null($form)) {
+    $output .= drupal_render($form);
+  }
+
   return $output;
 }
